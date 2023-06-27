@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Net;
-using System.Net.Sockets;
 using System.Net.WebSockets;
-using System.Text;
-using System.Threading;
 using Google.Protobuf;
-// using GrpcServiceClientCoreExample;
+using GrpcServiceWebSocketExample;
 
 class Program
 {
@@ -33,22 +29,22 @@ class Program
             }
             else if (receiveResult.MessageType == WebSocketMessageType.Binary)
             {
-                // var receivedMessage = YourMessage.Parser.ParseFrom(receiveBuffer, 0, receiveResult.Count);
-                //
-                // Console.WriteLine($"Received message: {receivedMessage.Name}. ConnectionId: {webSocketId}");
-                //
-                // // Пример ответного сообщения
-                // var responseMessage = new YourMessage
-                // {
-                //     Name = $"Server received: {receivedMessage.Name}"
-                // };
+                var receivedMessage = HelloRequest.Parser.ParseFrom(receiveBuffer, 0, receiveResult.Count);
+                
+                Console.WriteLine($"Received message: {receivedMessage.Name}. ConnectionId: {webSocketId}");
+                
+                // Пример ответного сообщения
+                var responseMessage = new HelloReply()
+                {
+                    Message = $"Server received: {receivedMessage.Name}"
+                };
 
-                // var responseBuffer = responseMessage.ToByteArray();
-                //
-                // foreach (var socket in _webSockets.Values)
-                // {
-                //     await socket.SendAsync(new ArraySegment<byte>(responseBuffer), WebSocketMessageType.Binary, true, CancellationToken.None);
-                // }
+                var responseBuffer = responseMessage.ToByteArray();
+                
+                foreach (var socket in _webSockets.Values)
+                {
+                    await socket.SendAsync(new ArraySegment<byte>(responseBuffer), WebSocketMessageType.Binary, true, CancellationToken.None);
+                }
             }
         }
     }
@@ -56,7 +52,7 @@ class Program
     static void Main(string[] args)
     {
         var listener = new HttpListener();
-        listener.Prefixes.Add("http://localhost:8080/"); // Установите желаемый URL для WebSocket сервера
+        listener.Prefixes.Add("http://localhost:5000/"); // Установите желаемый URL для WebSocket сервера
         listener.Start();
         Console.WriteLine("WebSocket server started.");
 
